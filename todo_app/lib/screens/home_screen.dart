@@ -15,17 +15,19 @@ class _HomeScreenState extends State<HomeScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  List<Todo> todoList = [
-    Todo()
-      ..title = "Title 1"
-      ..content = "Content 1",
-    Todo()
-      ..title = "Title 2"
-      ..content = "Content 2",
-    Todo()
-      ..title = "Title 3"
-      ..content = "Content 3",
-  ];
+  List<Todo> todoList = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getTodos();
+  }
+
+  void getTodos() async {
+    todoList = await widget.isar.fetchTodo();
+    setState(() {});
+  }
 
   void onPressed() {
     showDialog(
@@ -59,6 +61,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _changeChecked(Todo todo, bool checked) async {
+    checked = !checked;
+    await widget.isar.updateTodo(todo, isDone: checked);
+    print("changed");
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
             title: todoList[index].title,
             subtitle: todoList[index].content,
             isDone: todoList[index].isDone,
+            onTap: () =>
+                _changeChecked(todoList[index], todoList[index].isDone),
           );
         },
       ),

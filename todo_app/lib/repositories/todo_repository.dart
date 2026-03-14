@@ -20,10 +20,16 @@ class TodoRepository {
     });
   }
 
-  Future<void> updateTodo(Todo todo, String? title, String? content) async {
+  Future<void> updateTodo(
+    Todo todo, {
+    String? title,
+    String? content,
+    bool? isDone,
+  }) async {
     todo
       ..title = title ?? todo.title
-      ..content = content ?? todo.content;
+      ..content = content ?? todo.content
+      ..isDone = isDone ?? todo.isDone;
     await isar.writeTxn(() {
       return isar.todos.put(todo);
     });
