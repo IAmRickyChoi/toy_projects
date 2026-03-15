@@ -29,6 +29,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  void addTodo(String title, String subTitle) async {
+    await widget.isar.addTodo(title, subTitle);
+    getTodos();
+  }
+
+  void deleteTodo(int id) async {
+    await widget.isar.deleteTodo(id);
+    getTodos();
+  }
+
   void onPressed() {
     showDialog(
       context: context,
@@ -43,11 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () async {
-                await widget.isar.addTodo(
-                  _titleController.text,
-                  _contentController.text,
-                );
+              onPressed: () {
+                addTodo(_titleController.text, _contentController.text);
 
                 _titleController.clear();
                 _contentController.clear();
@@ -88,11 +95,13 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: todoList.length,
         itemBuilder: (context, index) {
           return TodoTile(
+            index: index,
             title: todoList[index].title,
             subtitle: todoList[index].content,
             isDone: todoList[index].isDone,
             onTap: () =>
                 _changeChecked(todoList[index], todoList[index].isDone),
+            delete: () => deleteTodo(todoList[index].id),
           );
         },
       ),
