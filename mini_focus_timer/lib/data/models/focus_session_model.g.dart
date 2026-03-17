@@ -17,14 +17,17 @@ const FocusSessionModelSchema = CollectionSchema(
   name: r'FocusSessionModel',
   id: 7372981340496076257,
   properties: {
-    r'recordTime': PropertySchema(
+    r'duration': PropertySchema(
       id: 0,
+      name: r'duration',
+      type: IsarType.long,
+    ),
+    r'recordTime': PropertySchema(
+      id: 1,
       name: r'recordTime',
       type: IsarType.dateTime,
-    ),
-    r'title': PropertySchema(id: 1, name: r'title', type: IsarType.string),
+    )
   },
-
   estimateSize: _focusSessionModelEstimateSize,
   serialize: _focusSessionModelSerialize,
   deserialize: _focusSessionModelDeserialize,
@@ -33,7 +36,6 @@ const FocusSessionModelSchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
-
   getId: _focusSessionModelGetId,
   getLinks: _focusSessionModelGetLinks,
   attach: _focusSessionModelAttach,
@@ -46,7 +48,6 @@ int _focusSessionModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
 
@@ -56,8 +57,8 @@ void _focusSessionModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.recordTime);
-  writer.writeString(offsets[1], object.title);
+  writer.writeLong(offsets[0], object.duration);
+  writer.writeDateTime(offsets[1], object.recordTime);
 }
 
 FocusSessionModel _focusSessionModelDeserialize(
@@ -66,9 +67,11 @@ FocusSessionModel _focusSessionModelDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = FocusSessionModel(recordTime: reader.readDateTime(offsets[0]));
+  final object = FocusSessionModel(
+    duration: reader.readLong(offsets[0]),
+    recordTime: reader.readDateTime(offsets[1]),
+  );
   object.id = id;
-  object.title = reader.readString(offsets[1]);
   return object;
 }
 
@@ -80,9 +83,9 @@ P _focusSessionModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -93,16 +96,12 @@ Id _focusSessionModelGetId(FocusSessionModel object) {
 }
 
 List<IsarLinkBase<dynamic>> _focusSessionModelGetLinks(
-  FocusSessionModel object,
-) {
+    FocusSessionModel object) {
   return [];
 }
 
 void _focusSessionModelAttach(
-  IsarCollection<dynamic> col,
-  Id id,
-  FocusSessionModel object,
-) {
+    IsarCollection<dynamic> col, Id id, FocusSessionModel object) {
   object.id = id;
 }
 
@@ -118,14 +117,17 @@ extension FocusSessionModelQueryWhereSort
 extension FocusSessionModelQueryWhere
     on QueryBuilder<FocusSessionModel, FocusSessionModel, QWhereClause> {
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterWhereClause>
-  idEqualTo(Id id) {
+      idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterWhereClause>
-  idNotEqualTo(Id id) {
+      idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -148,7 +150,7 @@ extension FocusSessionModelQueryWhere
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterWhereClause>
-  idGreaterThan(Id id, {bool include = false}) {
+      idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -157,7 +159,7 @@ extension FocusSessionModelQueryWhere
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterWhereClause>
-  idLessThan(Id id, {bool include = false}) {
+      idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -166,21 +168,19 @@ extension FocusSessionModelQueryWhere
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterWhereClause>
-  idBetween(
+      idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.between(
-          lower: lowerId,
-          includeLower: includeLower,
-          upper: upperId,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -188,253 +188,170 @@ extension FocusSessionModelQueryWhere
 extension FocusSessionModelQueryFilter
     on QueryBuilder<FocusSessionModel, FocusSessionModel, QFilterCondition> {
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  idEqualTo(Id value) {
+      durationEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'id', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'duration',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  idGreaterThan(Id value, {bool include = false}) {
+      durationGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'duration',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  idLessThan(Id value, {bool include = false}) {
+      durationLessThan(
+    int value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'id',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'duration',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  idBetween(
+      durationBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'duration',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
+      idEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
+      idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
+      idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
+      idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'id',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  recordTimeEqualTo(DateTime value) {
+      recordTimeEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'recordTime', value: value),
-      );
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'recordTime',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  recordTimeGreaterThan(DateTime value, {bool include = false}) {
+      recordTimeGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'recordTime',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'recordTime',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  recordTimeLessThan(DateTime value, {bool include = false}) {
+      recordTimeLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'recordTime',
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'recordTime',
+        value: value,
+      ));
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  recordTimeBetween(
+      recordTimeBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'recordTime',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleEqualTo(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'title',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'title',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'title',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'title',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleStartsWith(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'title',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleEndsWith(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'title',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'title',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'title',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'title', value: ''),
-      );
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterFilterCondition>
-  titleIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'title', value: ''),
-      );
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'recordTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -448,36 +365,50 @@ extension FocusSessionModelQueryLinks
 extension FocusSessionModelQuerySortBy
     on QueryBuilder<FocusSessionModel, FocusSessionModel, QSortBy> {
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  sortByRecordTime() {
+      sortByDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
+      sortByDurationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.desc);
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
+      sortByRecordTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordTime', Sort.asc);
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  sortByRecordTimeDesc() {
+      sortByRecordTimeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  sortByTitle() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'title', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  sortByTitleDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'title', Sort.desc);
     });
   }
 }
 
 extension FocusSessionModelQuerySortThenBy
     on QueryBuilder<FocusSessionModel, FocusSessionModel, QSortThenBy> {
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
+      thenByDuration() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
+      thenByDurationDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'duration', Sort.desc);
+    });
+  }
+
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -485,37 +416,23 @@ extension FocusSessionModelQuerySortThenBy
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  thenByIdDesc() {
+      thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  thenByRecordTime() {
+      thenByRecordTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordTime', Sort.asc);
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  thenByRecordTimeDesc() {
+      thenByRecordTimeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'recordTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  thenByTitle() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'title', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FocusSessionModel, FocusSessionModel, QAfterSortBy>
-  thenByTitleDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'title', Sort.desc);
     });
   }
 }
@@ -523,16 +440,16 @@ extension FocusSessionModelQuerySortThenBy
 extension FocusSessionModelQueryWhereDistinct
     on QueryBuilder<FocusSessionModel, FocusSessionModel, QDistinct> {
   QueryBuilder<FocusSessionModel, FocusSessionModel, QDistinct>
-  distinctByRecordTime() {
+      distinctByDuration() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'recordTime');
+      return query.addDistinctBy(r'duration');
     });
   }
 
   QueryBuilder<FocusSessionModel, FocusSessionModel, QDistinct>
-  distinctByTitle({bool caseSensitive = true}) {
+      distinctByRecordTime() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'recordTime');
     });
   }
 }
@@ -545,16 +462,16 @@ extension FocusSessionModelQueryProperty
     });
   }
 
-  QueryBuilder<FocusSessionModel, DateTime, QQueryOperations>
-  recordTimeProperty() {
+  QueryBuilder<FocusSessionModel, int, QQueryOperations> durationProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'recordTime');
+      return query.addPropertyName(r'duration');
     });
   }
 
-  QueryBuilder<FocusSessionModel, String, QQueryOperations> titleProperty() {
+  QueryBuilder<FocusSessionModel, DateTime, QQueryOperations>
+      recordTimeProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'title');
+      return query.addPropertyName(r'recordTime');
     });
   }
 }

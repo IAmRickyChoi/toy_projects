@@ -1,48 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_todo_app/presentation/view_models/timer_viewmodel.dart';
+import 'package:isar_todo_app/presentation/widgets/countdown_clock.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final timerState = ref.watch(timerViewModelProvider);
+    final timerViewModel = ref.read(timerViewModelProvider.notifier);
 
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("mini_focus_timer")),
+      appBar: AppBar(
+        title: const Text("Mini Focus Timer"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: timerViewModel.resetTimer,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Expanded(
+              flex: 2,
+              child: Center(child: CountdownClock()),
+            ),
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "test1",
-                    style: TextStyle(
-                      fontSize: 50.0,
-                      fontWeight: FontWeight.bold,
+              flex: 3,
+              child: ListView.builder(
+                itemCount: timerState.sessions.length,
+                itemBuilder: (context, index) {
+                  final session = timerState.sessions[index];
+                  return ListTile(
+                    title: Text(
+                      "Focus: ${session.duration ~/ 60} minutes",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  SizedBox(height: 10.0),
-                  Text("test2"),
-                ],
+                    subtitle: Text(
+                      "${session.recordTime}",
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => timerViewModel.deleteSession(session.id),
+                    ),
+                  );
+                },
               ),
             ),
-
-            Expanded(child: Container(color: Colors.yellow)),
-
-            SizedBox(
-              height: 50,
-              child: OutlinedButton(
-                onPressed: () {},
-                child: Text(
-                  "Start",
-                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: timerState.isRunning
+                        ? timerViewModel.pauseTimer
+                        : timerViewModel.startTimer,
+                    child: Text(
+                      timerState.isRunning ? "Pause" : "Start",
+                      style: const TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

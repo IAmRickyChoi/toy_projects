@@ -5,8 +5,11 @@ part 'focus_session_model.g.dart';
 @collection
 class FocusSessionModel {
   Id id = Isar.autoIncrement;
-  late String title;
+  final int duration;
   final DateTime recordTime;
 
-  FocusSessionModel({required this.recordTime});
+  FocusSessionModel({
+    required this.duration,
+    required this.recordTime,
+  });
 }

@@ -1,25 +1,33 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
-import 'package:mini_focus_timer/data/models/focus_session_model.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:isar_todo_app/data/models/focus_session_model.dart';
+
+final timerRepositoryProvider = Provider<TimerRepositoryImpl>((ref) {
+  return TimerRepositoryImpl(ref.watch(isarProvider));
+});
+
+final isarProvider = Provider<Isar>((ref) {
+  throw UnimplementedError();
+});
 
 class TimerRepositoryImpl {
-  late Isar _isar;
+  final Isar _isar;
 
-  void initialize() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final _isar = await Isar.open([
-      FocusSessionModelSchema,
-    ], directory: dir.path);
+  TimerRepositoryImpl(this._isar);
+
+  Future<List<FocusSessionModel>> getSessions() async {
+    return await _isar.focusSessionModels.where().findAll();
   }
 
-  Future<void> saveTime(DateTime date) async {
-    final savedTime = FocusSessionModel(recordTime: date);
+  Future<void> saveSession(FocusSessionModel model) async {
     await _isar.writeTxn(() async {
-      await _isar.focusSessionModels.put(savedTime);
+      await _isar.focusSessionModels.put(model);
     });
   }
 
-  Future<void> deleteTime(int id) async {
-    await _isar.focusSessionModels.delete(id);
+  Future<void> deleteSession(int id) async {
+    await _isar.writeTxn(() async {
+      await _isar.focusSessionModels.delete(id);
+    });
   }
 }
