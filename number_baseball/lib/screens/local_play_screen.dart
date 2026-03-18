@@ -32,10 +32,31 @@ class _LocalPlayScreenState extends State<LocalPlayScreen> {
                 child: Text("test", style: TextStyle(fontSize: 20)),
               ),
             ),
-            Expanded(
-              child: Container(child: Text("${gameNumbers.gameNumbers}")),
+            Expanded(child: Container(color: Colors.red)),
+            Center(
+              child: Container(
+                child: Text(
+                  "${gameNumbers.gameNumbers}",
+                  style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-            Container(child: Text("test", style: TextStyle(fontSize: 20))),
+            Expanded(
+              child: Container(
+                color: Colors.blue,
+                child: GridView(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                  ),
+                  children: List.generate(
+                    20,
+                    (index) => Container(child: Text("$index"), height: 20),
+                  ),
+                ),
+              ),
+            ),
+
+            Container(child: Text("test", style: TextStyle(fontSize: 30))),
           ],
         ),
       ),
