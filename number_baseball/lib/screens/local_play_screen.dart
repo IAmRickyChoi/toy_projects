@@ -46,11 +46,12 @@ class _LocalPlayScreenState extends State<LocalPlayScreen> {
                 color: Colors.blue,
                 child: GridView(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                    crossAxisCount: 3,
+                    childAspectRatio: 5 / 1,
                   ),
                   children: List.generate(
                     20,
-                    (index) => Container(child: Text("$index"), height: 20),
+                    (index) => Container(child: Text("$index")),
                   ),
                 ),
               ),
