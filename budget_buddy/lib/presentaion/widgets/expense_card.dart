@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ExpenseCard extends StatelessWidget {
-  const ExpenseCard({super.key});
+  final String item;
+  final double price;
+  final DateTime datetime;
+  final VoidCallback onDelete;
+  const ExpenseCard({
+    super.key,
+    required this.item,
+    required this.price,
+    required this.datetime,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final date = DateFormat("HH:mm").format(datetime);
     return Card(
       elevation: 1,
       margin: EdgeInsets.only(left: 10, right: 10, top: 13),
@@ -15,18 +27,18 @@ class ExpenseCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "purchased item",
+                item,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 5),
               Text(
-                "date",
+                date,
                 style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           trailing: IconButton(
-            onPressed: () {},
+            onPressed: onDelete,
             icon: Icon(Icons.delete, color: Colors.red[400]),
           ),
         ),

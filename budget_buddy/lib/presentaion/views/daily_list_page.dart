@@ -1,6 +1,8 @@
+import 'package:budget_buddy/data/models/expense_model.dart';
 import 'package:budget_buddy/presentaion/view_models/expense_provider.dart';
 import 'package:budget_buddy/presentaion/widgets/expense_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 1. 리버팟 패키지 임포트
 
 // 2. ConsumerStatefulWidget으로 변경
@@ -42,7 +44,7 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
   @override
   Widget build(BuildContext context) {
     // 4. 여기서 ref.watch를 사용해서 프로바이더(プロバイダー)의 상태(状態)를 구독해!
-    final _isar = ref.watch(expenseListProvider);
+    final expense = ref.watch(expenseListProvider);
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -52,56 +54,75 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
         child: const Icon(Icons.add),
       ),
       backgroundColor: const Color.fromRGBO(255, 245, 157, 1),
-      body: CustomScrollView(
-        controller: scrollController,
-        slivers: [
-          SliverAppBar(
-            title: isExpanded
-                ? null
-                : Text(
-                    "today budget",
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-            expandedHeight: 300,
-            pinned: true,
-            surfaceTintColor: Colors.yellow[200],
-            backgroundColor: Colors.yellow[200],
-            flexibleSpace: FlexibleSpaceBar(
-              background: SizedBox(
-                width: double.infinity,
-                child: Container(
-                  color: Colors.yellow[600],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(height: kToolbarHeight),
-                      Text(
-                        "Test", // 예: myBudgetState.title
+      body: expense.when(
+        data: (expenseList) {
+          if (expenseList.isEmpty) return Text("No Budget for today");
+          return CustomScrollView(
+            controller: scrollController,
+            slivers: [
+              SliverAppBar(
+                title: isExpanded
+                    ? null
+                    : Text(
+                        "today budget",
                         style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        " 12,230 ￥", // 예: "${myBudgetState.amount} ￥"
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w500,
-                        ),
+                expandedHeight: 300,
+                pinned: true,
+                surfaceTintColor: Colors.yellow[200],
+                backgroundColor: Colors.yellow[200],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: SizedBox(
+                    width: double.infinity,
+                    child: Container(
+                      color: Colors.yellow[600],
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(height: kToolbarHeight),
+                          Text(
+                            "Test", // 예: myBudgetState.title
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            " 12,230 ￥", // 예: "${myBudgetState.amount} ￥"
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          SliverList.builder(
-            itemCount: 40, // 예: myBudgetState.expenses.length
-            itemBuilder: (context, index) {
-              return ExpenseCard();
-            },
-          ),
-        ],
+              SliverList.builder(
+                itemCount:
+                    expenseList.length, // 예: myBudgetState.expenses.length
+                itemBuilder: (context, index) {
+                  return ExpenseCard(
+                    item: expenseList[index].title,
+                    price: expenseList[index].price,
+                    datetime: expenseList[index].datetime,
+                    onDelete: () => ref
+                        .read(expenseListProvider.notifier)
+                        .deleteExpense(expenseList[index].id),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('에러: $err')),
       ),
     );
   }
@@ -126,6 +147,8 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
               ),
               TextFormField(
                 controller: itemPriceEditingController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   hint: Text(
                     'price',
@@ -138,7 +161,13 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
           actions: [
             OutlinedButton(
               onPressed: () {
+                final expense = ExpenseModel()
+                  ..title = itemTextEditingController.text
+                  ..price =
+                      double.tryParse(itemPriceEditingController.text) ?? 0.0;
+                ref.read(expenseListProvider.notifier).addExpense(expense);
                 itemTextEditingController.clear();
+                itemPriceEditingController.clear();
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
