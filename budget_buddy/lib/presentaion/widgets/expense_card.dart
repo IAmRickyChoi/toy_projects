@@ -37,6 +37,10 @@ class ExpenseCard extends StatelessWidget {
               ),
             ],
           ),
+          title: Text(
+            '${price.toStringAsFixed(0)} ¥',
+            textAlign: TextAlign.right,
+          ),
           trailing: IconButton(
             onPressed: onDelete,
             icon: Icon(Icons.delete, color: Colors.red[400]),

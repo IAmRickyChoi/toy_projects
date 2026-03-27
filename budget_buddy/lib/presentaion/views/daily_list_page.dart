@@ -45,6 +45,8 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
   Widget build(BuildContext context) {
     // 4. 여기서 ref.watch를 사용해서 프로바이더(プロバイダー)의 상태(状態)를 구독해!
     final expense = ref.watch(expenseListProvider);
+    final DateTime now = DateTime.now();
+    final String date = "${now.year}.${now.month.toString().padLeft(2, '0')}";
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -56,7 +58,11 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
       backgroundColor: const Color.fromRGBO(255, 245, 157, 1),
       body: expense.when(
         data: (expenseList) {
-          if (expenseList.isEmpty) return Text("No Budget for today");
+          if (expenseList.isEmpty) return Text("No Budget today");
+          final totalToday = expenseList.fold<double>(
+            0,
+            (prev, element) => prev + element.price,
+          );
           return CustomScrollView(
             controller: scrollController,
             slivers: [
@@ -64,7 +70,7 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
                 title: isExpanded
                     ? null
                     : Text(
-                        "today budget",
+                        "${totalToday.toStringAsFixed(0)} ￥",
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -84,14 +90,14 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
                         children: [
                           SizedBox(height: kToolbarHeight),
                           Text(
-                            "Test", // 예: myBudgetState.title
+                            "$date Budget", // 예: myBudgetState.title
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           Text(
-                            " 12,230 ￥", // 예: "${myBudgetState.amount} ￥"
+                            "${totalToday.toStringAsFixed(0)} ￥", // 예: "${myBudgetState.amount} ￥"
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.w500,

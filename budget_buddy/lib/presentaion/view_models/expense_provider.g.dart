@@ -88,7 +88,7 @@ final class ExpenseRepoProvider
   }
 }
 
-String _$expenseRepoHash() => r'f7de5d6f37c2b544534fca15f558b2ae9e04a4df';
+String _$expenseRepoHash() => r'ec19f28f4664d2f26124ff9538bb965e775cafc5';
 
 @ProviderFor(ExpenseList)
 final expenseListProvider = ExpenseListProvider._();
@@ -114,7 +114,7 @@ final class ExpenseListProvider
   ExpenseList create() => ExpenseList();
 }
 
-String _$expenseListHash() => r'6905f867cc1e4a25c4637077b8b64cab3378238f';
+String _$expenseListHash() => r'bd25e88ef0bb5c639e4b83e3c5a6529f15f7c192';
 
 abstract class _$ExpenseList extends $StreamNotifier<List<ExpenseModel>> {
   Stream<List<ExpenseModel>> build();

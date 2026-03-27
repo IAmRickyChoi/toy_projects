@@ -19,16 +19,21 @@ class ExpenseList extends _$ExpenseList {
   @override
   Stream<List<ExpenseModel>> build() {
     final service = ref.watch(expenseRepoProvider);
-    return service.watchExpense();
+    return service.watchTodayExpense();
   }
 
   Future<void> addExpense(ExpenseModel item) {
-    final service = ref.watch(expenseRepoProvider);
+    final service = ref.read(expenseRepoProvider);
     return service.addExpense(item);
   }
 
   Future<void> deleteExpense(int id) {
-    final servie = ref.watch(expenseRepoProvider);
+    final servie = ref.read(expenseRepoProvider);
     return servie.deleteExpense(id);
+  }
+
+  Future<double> getTodayExpenses() async {
+    final service = ref.read(expenseRepoProvider);
+    return await service.getTodayExpenses();
   }
 }
