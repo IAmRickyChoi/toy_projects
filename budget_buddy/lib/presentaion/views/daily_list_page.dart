@@ -1,5 +1,7 @@
 import 'package:budget_buddy/data/models/expense_model.dart';
 import 'package:budget_buddy/presentaion/view_models/expense_provider.dart';
+import 'package:budget_buddy/presentaion/views/insight_page.dart';
+import 'package:budget_buddy/presentaion/widgets/calendar_dialog.dart';
 import 'package:budget_buddy/presentaion/widgets/expense_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,8 +47,9 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
   Widget build(BuildContext context) {
     // 4. 여기서 ref.watch를 사용해서 프로바이더(プロバイダー)의 상태(状態)를 구독해!
     final expense = ref.watch(expenseListProvider);
-    final DateTime now = DateTime.now();
-    final String date = "${now.year}.${now.month.toString().padLeft(2, '0')}";
+    final now = ref.watch(selectedDateProvider);
+    final String date =
+        "${now.year.toString().substring(2)}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')}";
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -58,7 +61,6 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
       backgroundColor: const Color.fromRGBO(255, 245, 157, 1),
       body: expense.when(
         data: (expenseList) {
-          if (expenseList.isEmpty) return Text("No Budget today");
           final totalToday = expenseList.fold<double>(
             0,
             (prev, element) => prev + element.price,
@@ -77,6 +79,7 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
                         ),
                       ),
                 expandedHeight: 300,
+
                 pinned: true,
                 surfaceTintColor: Colors.yellow[200],
                 backgroundColor: Colors.yellow[200],
@@ -90,10 +93,10 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
                         children: [
                           SizedBox(height: kToolbarHeight),
                           Text(
-                            "$date Budget", // 예: myBudgetState.title
+                            date,
                             style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 50,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
@@ -108,21 +111,55 @@ class _DailyListPageState extends ConsumerState<DailyListPage> {
                     ),
                   ),
                 ),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return InsightPage();
+                          },
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.bar_chart_outlined,
+                      color: Colors.yellow[900],
+                      size: 40,
+                    ),
+                  ),
+                ],
               ),
-              SliverList.builder(
-                itemCount:
-                    expenseList.length, // 예: myBudgetState.expenses.length
-                itemBuilder: (context, index) {
-                  return ExpenseCard(
-                    item: expenseList[index].title,
-                    price: expenseList[index].price,
-                    datetime: expenseList[index].datetime,
-                    onDelete: () => ref
-                        .read(expenseListProvider.notifier)
-                        .deleteExpense(expenseList[index].id),
-                  );
-                },
-              ),
+
+              expenseList.isEmpty
+                  ? SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 25),
+                          Text(
+                            "No Budget today",
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : SliverList.builder(
+                      itemCount: expenseList
+                          .length, // 예: myBudgetState.expenses.length
+                      itemBuilder: (context, index) {
+                        return ExpenseCard(
+                          item: expenseList[index].title,
+                          price: expenseList[index].price,
+                          datetime: expenseList[index].datetime,
+                          onDelete: () => ref
+                              .read(expenseListProvider.notifier)
+                              .deleteExpense(expenseList[index].id),
+                        );
+                      },
+                    ),
             ],
           );
         },

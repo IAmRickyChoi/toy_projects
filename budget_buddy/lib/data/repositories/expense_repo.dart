@@ -9,10 +9,9 @@ class ExpenseRepo {
     return _isar.expenseModels.where().watch(fireImmediately: true);
   }
 
-  Stream<List<ExpenseModel>> watchTodayExpense() {
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
-    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+  Stream<List<ExpenseModel>> watchTodayExpense(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
 
     return _isar.expenseModels
         .filter()
@@ -43,5 +42,20 @@ class ExpenseRepo {
         .datetimeBetween(startOfDay, endOfDay)
         .priceProperty()
         .sum();
+  }
+
+  Stream<List<ExpenseModel>> watchExpenseByDateRange(
+    DateTime start,
+    DateTime end,
+  ) {
+    // 시작일의 00:00:00
+    final startOfDay = DateTime(start.year, start.month, start.day);
+    // 종료일의 23:59:59
+    final endOfDay = DateTime(end.year, end.month, end.day, 23, 59, 59, 999);
+
+    return _isar.expenseModels
+        .filter()
+        .datetimeBetween(startOfDay, endOfDay)
+        .watch(fireImmediately: true);
   }
 }
