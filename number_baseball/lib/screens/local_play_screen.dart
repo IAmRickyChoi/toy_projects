@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:number_baseball/model/make_num.dart';
+import 'package:number_baseball/screens/widgets/number_pad.dart';
 
 class LocalPlayScreen extends StatefulWidget {
   const LocalPlayScreen({super.key});
@@ -56,6 +57,7 @@ class _LocalPlayScreenState extends State<LocalPlayScreen> {
                 ),
               ),
             ),
+            NumberPad(),
 
             Container(child: Text("test", style: TextStyle(fontSize: 30))),
           ],
